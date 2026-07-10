@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /root)",
+      "Bash(ls -la /home)",
+      "Bash(ls -la /workspace)",
+      "Bash(ls -la /project)",
+      "Bash(find /tmp -maxdepth 2 \\\\\\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.pdf' -o -iname '*.svg' \\\\\\) -not -path '*/node_modules/*')",
+      "Bash(grep -viE '\\\\.tmp|\\\\.log|\\\\.cpuprofile|\\\\.url|node-compile|mozilla|^total|^d.* \\\\.$|BST')",
+      "Bash(cmd.exe /c \"dir D:\\\\portfolio\")",
+      "Bash(powershell.exe -c \"Get-ChildItem 'D:\\\\portfolio'\")",
+      "Bash(cat .claude/settings.local.json)",
+      "Bash(node -v)",
+      "Bash(npm -v)",
+      "Bash(ls package.json next.config.*)",
+      "Bash(npm install *)",
+      "Bash(npx next *)",
+      "Bash(mkdir -p public/assets/projects)",
+      "Bash(cp \"project_image/cricket.png\" public/assets/projects/ai-match-predictor.png)",
+      "Bash(cp \"project_image/miindsettler.png\" public/assets/projects/mindsettler.png)",
+      "Bash(cp \"project_image/face_mask.png\" public/assets/projects/maskdetect.png)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

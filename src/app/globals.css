@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #05060a;
+  --bg-soft: #0a0c12;
+  --fg: #e8eaf0;
+  --muted: #8b90a0;
+  --line: rgba(255, 255, 255, 0.08);
+}
+
+.light {
+  --bg: #f6f7fb;
+  --bg-soft: #ffffff;
+  --fg: #14161d;
+  --muted: #5a6072;
+  --line: rgba(10, 12, 20, 0.1);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+@layer base {
+  ::selection {
+    background: rgba(167, 139, 250, 0.3);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1280px] px-6 md:px-10;
+  }
+
+  .glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.015)
+    );
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line);
+  }
+
+  .light .glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.8),
+      rgba(255, 255, 255, 0.55)
+    );
+  }
+
+  .card-surface {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
+    border: 1px solid var(--line);
+  }
+
+  .light .card-surface {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(248, 249, 252, 0.8)
+    );
+  }
+
+  .text-gradient {
+    @apply bg-iris-gradient bg-clip-text text-transparent;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--muted)];
+  }
+
+  .mono-label {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)];
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-line bg-black/20 px-4 py-3 text-sm text-[var(--fg)] outline-none transition-colors placeholder:text-[var(--muted)] focus:border-white/25;
+  }
+
+  .light .input-field {
+    background: rgba(10, 12, 20, 0.03);
+  }
+}
+
+@layer utilities {
+  .text-muted {
+    color: var(--muted);
+  }
+  .bg-soft {
+    background-color: var(--bg-soft);
+  }
+  .mask-fade-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+  .hover-lift {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Ambient background glow layers */
+.bg-aurora::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(
+      60rem 40rem at 80% -10%,
+      rgba(167, 139, 250, 0.12),
+      transparent 60%
+    ),
+    radial-gradient(
+      50rem 40rem at 0% 20%,
+      rgba(125, 211, 252, 0.09),
+      transparent 55%
+    );
+  pointer-events: none;
+}
+
+.light .bg-aurora::before {
+  background:
+    radial-gradient(
+      60rem 40rem at 80% -10%,
+      rgba(167, 139, 250, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      50rem 40rem at 0% 20%,
+      rgba(125, 211, 252, 0.16),
+      transparent 55%
+    );
+}
+
+.bg-grid {
+  background-image: var(--tw-gradient, none),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+}
+
+.light .bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(10, 12, 20, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 12, 20, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px, 48px 48px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.4);
+  background-clip: content-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
