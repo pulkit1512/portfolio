@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 /**
@@ -187,15 +187,49 @@ function Pulses() {
 }
 
 export default function NeuralScene() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  // Only drive the WebGL render loop while the hero is actually on screen (and
+  // the tab is visible). Off-screen the scene is frozen — no rAF, no GPU work —
+  // which keeps scrolling through the rest of the page smooth. Visually
+  // identical: it animates whenever it's in view, and the clock only advances
+  // on rendered frames so it resumes seamlessly.
+  const [active, setActive] = useState(true);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+
+    let inView = true;
+    const sync = () => setActive(inView && !document.hidden);
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        sync();
+      },
+      { rootMargin: "120px" }
+    );
+    obs.observe(el);
+    document.addEventListener("visibilitychange", sync);
+
+    return () => {
+      obs.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, []);
+
   return (
-    <Canvas
-      camera={{ position: [0, 0, 8], fov: 45 }}
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
-      style={{ background: "transparent" }}
-    >
-      <Network />
-      <Pulses />
-    </Canvas>
+    <div ref={wrapRef} className="h-full w-full">
+      <Canvas
+        frameloop={active ? "always" : "never"}
+        camera={{ position: [0, 0, 8], fov: 45 }}
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true }}
+        style={{ background: "transparent" }}
+      >
+        <Network />
+        <Pulses />
+      </Canvas>
+    </div>
   );
 }

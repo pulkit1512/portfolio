@@ -6,7 +6,7 @@
 > Design quality mirrors the reference screenshots in `reference images/` (original implementation, no copied assets/text).
 > Certificate images come only from the local `certifiate/` folder (copied into `public/certificates/`).
 
-_Last updated: 2026-07-12 (added 2 projects + repo links; fixed navbar→section scroll-offset gap)_
+_Last updated: 2026-07-12 (performance pass: pause off-screen Three.js loop + AVIF images; added 2 projects + repo links; fixed navbar→section scroll-offset gap)_
 
 ---
 
@@ -184,3 +184,20 @@ Files touched this session: created `src/app/page.tsx`, `src/components/sections
 - **Card badge:** `projects.tsx` status pill now distinguishes **Live** / **Source** (public repo) / **Private**, so the two updated projects don't show a contradictory "Private" lock. Added `NLP` to `domainIcon`.
 - **Layout fix (scroll offset):** the navbar→section gap was caused by three stacked offsets — `html scroll-padding-top: 90px` + `Section scroll-mt-24` (96px) + the section's own `py-24/32` top padding — landing nav clicks ~200px+ below the navbar. Fixed by using a **single** small offset (`scroll-padding-top: 1.25rem`), removing `scroll-mt-24` from `Section`, and rebalancing its padding to `pt-24 pb-24 md:pb-32`. Nav links now land the section header a balanced ~40px below the navbar across all 7 sections (About, Projects, Neural Studio, Experience, Stack, Certifications, Contact — all share `Section`). No global padding slash; between-section rhythm preserved via the taller bottom padding.
 - Verified: clean `next build` (4/4 static pages, no type/lint errors), HTTP-200 smoke test — all **5** project titles in served HTML, both new screenshots serve 200 via the image optimizer, and all four GitHub repo URLs present in the HTML.
+
+### Session 2026-07-12 (performance / smoothness pass — no visual changes)
+**Diagnosis.** Profiling the components (not just the recent diff) showed the dominant continuous cost was the Hero's **Three.js scene running its render loop even when scrolled off-screen**. `NeuralScene`'s two `useFrame` callbacks (network rotation + per-node scaling, and 60 particles whose positions are rewritten into a GPU buffer every frame at up to 2× DPR) ran at full `requestAnimationFrame` regardless of scroll position or tab visibility — so every other section (Projects, Neural Studio, …) was competing with a full WebGL frame budget while you scrolled. The large source screenshots were **not** a scroll-lag cause: Next's optimizer already downscales per-device and serves WebP, so the client never downloads the ~1.9 MB PNGs.
+
+**Optimizations made (UI visually identical):**
+- **`src/components/hero/neural-scene.tsx` — pause the WebGL loop off-screen.** Wrapped the `<Canvas>` in a ref'd container and drive `frameloop` from an `IntersectionObserver` (`rootMargin: 120px`) **plus** `document.visibilitychange`: `frameloop="always"` only while the hero is on screen and the tab is visible, otherwise `"never"` (zero rAF, zero GPU work). The r3f clock only advances on rendered frames, so the animation resumes seamlessly and looks identical whenever it's actually in view. This is the primary smoothness fix — it frees the frame budget for scrolling/hover/nav everywhere else on the page (checklist items 5, 8, 9). Already-good: `NeuralScene` was already `dynamic(..., { ssr: false })` (lazy, client-only), so no extra lazy-loading was needed (item 7).
+- **`next.config.mjs` — enable AVIF then WebP** (`images.formats`). The ~1900px source screenshots now ship as tiny per-device AVIF/WebP variants (verified: the 1.86 MB `similar-got-character.png` is delivered as **31.7 KB AVIF** / 42 KB WebP, negotiated by `Accept`). No new dependency; rendered result identical (items 6, 16–18).
+
+**Checked and intentionally left as-is (already correct, or changing them would alter visuals):**
+- **Project / certification images** already use `next/image` correctly with `fill` + accurate `sizes` (`(min-width:1024px) 50vw, 100vw` for the 2-col project grid; `(max-width:768px) 100vw, 33vw` for the 3-col cert grid) and are lazy by default (below the fold → no `priority`, which is correct) (items 17, 18). Source PNGs (~1900px) are a sensible master size and are downscaled by the optimizer, so no re-encode/resize was needed and none was done (no `sharp`/tool dependency added).
+- **Navbar** uses one passive scroll listener (only flips a boolean; React bails out on unchanged state → no re-render storm) and a single `IntersectionObserver` for active-section highlighting — not per-scroll animation work (items 4, 10, 13, 15).
+- **`Reveal` / `Stagger`** use `useInView({ once: true })` — each entrance animation fires once and then stops; observers are lightweight and passive (item 12).
+- **Neural Studio SVG diagrams** contain `repeat: Infinity` Framer Motion loops, but they animate a handful of SVG attributes (cheap, GPU-friendly) and are core to the section's design. Gating them per-viewport would require threading paused state through 6 distinct diagrams and risk visible re-animation on scroll-back, so they were left intact to keep the UI **visually identical** (the heavy continuous cost — WebGL — was the one that mattered and is now gated).
+- **Marquee** is a pure CSS transform keyframe (GPU-composited, negligible cost) — unchanged.
+- **No new dependencies** were introduced this or last session; First Load JS is unchanged at **156 kB** (item 19).
+
+**Verified:** clean `next build` (4/4 static pages, no type/lint errors); `next start` smoke test HTTP 200; AVIF/WebP content-negotiation confirmed via `curl` Accept headers; hero animation still runs while the hero is in view and freezes when scrolled away. Scrolling, hover (project/arch cards), and nav-link jumps remain smooth with the WebGL loop no longer contending for frames off-screen.
