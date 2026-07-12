@@ -2,7 +2,7 @@
 
 /**
  * Neural Studio diagrams — six hand-built figures, one per required
- * architecture (CNN · ResNet · EfficientNet · LSTM · Transformer · ViT).
+ * architecture (CNN · ResNet · RNN · LSTM · Transformer · ViT).
  * All original SVG / CSS, no external assets or copied artwork.
  */
 
@@ -21,6 +21,9 @@ const C = {
   mint: "#6ee7b7",
   muted: "#8b90a0",
 };
+
+/* Unicode subscripts for time-step labels (h₁ … x₅). */
+const SUB = ["₁", "₂", "₃", "₄", "₅"];
 
 /* Shared arrowhead marker set (unique ids so multiple diagrams can coexist). */
 function Arrow({ id, color = C.muted }: { id: string; color?: string }) {
@@ -307,127 +310,113 @@ export function ResNetDiagram() {
   );
 }
 
-/* ---------------------------------------------------------------- 03 · EFFICIENTNET */
+/* ---------------------------------------------------------------- 03 · RNN */
 
-const EFF_ROWS = [
-  { label: "Depth", coef: "αᵠ", base: 0.34, scaled: 0.72, color: C.cyan },
-  { label: "Width", coef: "βᵠ", base: 0.42, scaled: 0.6, color: C.iris },
-  { label: "Resolution", coef: "γᵠ", base: 0.5, scaled: 0.9, color: C.fuchsia },
-];
+/**
+ * A single recurrent cell unrolled across five time-steps. Each hidden state
+ * hₜ receives the input xₜ from below, emits the output yₜ upward, and passes
+ * its state to the next step along an animated recurrence link. Rebuilt from
+ * the reference as responsive SVG — no external asset used.
+ */
+export function RNNDiagram() {
+  const N = 5;
+  const cy = 132;
+  const half = 23;
+  const xs = Array.from({ length: N }, (_, k) => 60 + k * 100);
 
-export function EfficientNetDiagram() {
-  const trackX = 150;
-  const trackW = 268;
-  const rowY = [96, 152, 208];
   return (
-    <svg viewBox="0 0 480 250" className="h-full w-full">
-      {/* header */}
-      <text
-        x={40}
-        y={48}
-        fill={C.muted}
-        fontFamily="monospace"
-        fontSize="11"
-        letterSpacing="1"
-      >
-        compound scaling
-      </text>
-      <text
-        x={440}
-        y={48}
-        textAnchor="end"
-        fill={C.mint}
-        fontFamily="monospace"
-        fontSize="11"
-      >
-        d · w² · r² ≈ 2ᵠ
-      </text>
+    <svg viewBox="0 0 520 260" className="h-full w-full">
+      <defs>
+        <Arrow id="rnn-arrow" color={C.muted} />
+        <Arrow id="rnn-flow" color={C.cyan} />
+      </defs>
 
-      {EFF_ROWS.map((r, i) => {
-        const y = rowY[i];
-        const baseX = trackX + r.base * trackW;
-        return (
-          <g key={r.label}>
-            {/* label */}
-            <text
-              x={40}
-              y={y + 4}
-              fill="currentColor"
-              fontFamily="monospace"
-              fontSize="12"
-            >
-              {r.label}
-            </text>
-            {/* track */}
-            <rect
-              x={trackX}
-              y={y - 6}
-              width={trackW}
-              height={12}
-              rx={6}
-              fill="rgba(255,255,255,0.05)"
-              stroke="rgba(255,255,255,0.08)"
-            />
-            {/* animated fill */}
-            <motion.rect
-              y={y - 6}
-              height={12}
-              rx={6}
-              fill={r.color}
-              fillOpacity={0.55}
-              x={trackX}
-              initial={false}
-              animate={{ width: [r.base * trackW, r.scaled * trackW] }}
-              transition={{
-                duration: 2.2,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-                delay: i * 0.18,
-              }}
-            />
-            {/* baseline tick */}
-            <line
-              x1={baseX}
-              y1={y - 12}
-              x2={baseX}
-              y2={y + 12}
-              stroke="rgba(255,255,255,0.35)"
-              strokeDasharray="2 2"
-            />
-            {/* coefficient */}
-            <text
-              x={trackX + trackW + 14}
-              y={y + 4}
-              fill={r.color}
-              fontFamily="monospace"
-              fontSize="12"
-            >
-              {r.coef}
-            </text>
-          </g>
-        );
-      })}
+      {/* recurrence links between consecutive cells (hidden state through time) */}
+      {xs.slice(0, -1).map((x, i) => (
+        <motion.line
+          key={`rec-${i}`}
+          x1={x + half}
+          y1={cy}
+          x2={xs[i + 1] - half - 6}
+          y2={cy}
+          stroke={C.cyan}
+          strokeOpacity={0.7}
+          strokeWidth={1.4}
+          strokeDasharray="5 6"
+          markerEnd="url(#rnn-flow)"
+          initial={{ strokeDashoffset: 0 }}
+          animate={{ strokeDashoffset: -22 }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
+        />
+      ))}
 
-      <text
-        x={trackX}
-        y={234}
-        fill={C.muted}
-        fontFamily="monospace"
-        fontSize="9"
-      >
-        baseline
-      </text>
-      <text
-        x={trackX + trackW}
-        y={234}
-        textAnchor="end"
-        fill={C.muted}
-        fontFamily="monospace"
-        fontSize="9"
-      >
-        scaled
-      </text>
+      {xs.map((x, k) => (
+        <g key={`cell-${k}`}>
+          {/* input xₜ → cell */}
+          <line
+            x1={x}
+            y1={cy + half + 46}
+            x2={x}
+            y2={cy + half + 6}
+            stroke={C.muted}
+            strokeOpacity={0.6}
+            markerEnd="url(#rnn-arrow)"
+          />
+          <text
+            x={x}
+            y={cy + half + 62}
+            textAnchor="middle"
+            fill={C.muted}
+            fontFamily="monospace"
+            fontSize="11"
+          >
+            x{SUB[k]}
+          </text>
+
+          {/* cell → output yₜ */}
+          <line
+            x1={x}
+            y1={cy - half - 6}
+            x2={x}
+            y2={cy - half - 44}
+            stroke={C.muted}
+            strokeOpacity={0.6}
+            markerEnd="url(#rnn-arrow)"
+          />
+          <text
+            x={x}
+            y={cy - half - 52}
+            textAnchor="middle"
+            fill={C.muted}
+            fontFamily="monospace"
+            fontSize="11"
+          >
+            y{SUB[k]}
+          </text>
+
+          {/* hidden-state cell */}
+          <rect
+            x={x - half}
+            y={cy - half}
+            width={half * 2}
+            height={half * 2}
+            rx={10}
+            fill="#0a0c12"
+            stroke={C.cyan}
+            strokeWidth={1.4}
+          />
+          <text
+            x={x}
+            y={cy + 5}
+            textAnchor="middle"
+            fill="currentColor"
+            fontFamily="monospace"
+            fontSize="14"
+          >
+            h{SUB[k]}
+          </text>
+        </g>
+      ))}
     </svg>
   );
 }
@@ -469,7 +458,7 @@ function Gate({
 function Op({ x, glyph }: { x: number; glyph: string }) {
   return (
     <g>
-      <circle cx={x} cy={104} r={11} fill="#0a0c12" stroke="rgba(255,255,255,0.5)" />
+      <circle cx={x} cy={104} r={11} fill="#0a0c12" stroke="rgba(255,255,255,0.55)" />
       <text x={x} y={109} textAnchor="middle" fill="currentColor" fontSize="13">
         {glyph}
       </text>
@@ -477,9 +466,17 @@ function Op({ x, glyph }: { x: number; glyph: string }) {
   );
 }
 
+/**
+ * LSTM cell — the cyan cell-state rail (Cₜ₋₁ → Cₜ) carries a × forget gate and
+ * a + input add; the fuchsia hidden-state rail (hₜ₋₁ → hₜ) runs below. Four
+ * gates (fₜ, iₜ, gₜ, oₜ) sit on vertical stems between the two rails. Rebuilt
+ * from the reference as responsive SVG.
+ */
 export function LSTMDiagram() {
+  const gates = [150, 220, 290, 360];
   return (
     <svg viewBox="0 0 500 260" className="h-full w-full">
+      {/* title */}
       <text
         x={250}
         y={26}
@@ -491,6 +488,8 @@ export function LSTMDiagram() {
       >
         LSTM · CELL
       </text>
+
+      {/* cell boundary */}
       <rect
         x={95}
         y={70}
@@ -501,6 +500,21 @@ export function LSTMDiagram() {
         stroke="rgba(255,255,255,0.18)"
         strokeDasharray="5 5"
       />
+
+      {/* vertical stems linking the two rails through each gate */}
+      {gates.map((x, i) => (
+        <line
+          key={`stem-${i}`}
+          x1={x}
+          y1={104}
+          x2={x}
+          y2={210}
+          stroke="rgba(255,255,255,0.22)"
+          strokeDasharray={i === 1 || i === 2 ? "3 3" : undefined}
+        />
+      ))}
+
+      {/* cell-state rail (top, cyan) */}
       <line x1={20} y1={104} x2={480} y2={104} stroke={C.cyan} strokeWidth={2} strokeOpacity={0.85} />
       <text x={18} y={96} fill={C.muted} fontFamily="monospace" fontSize="11">
         Cₜ₋₁
@@ -508,6 +522,8 @@ export function LSTMDiagram() {
       <text x={468} y={96} textAnchor="end" fill={C.cyan} fontFamily="monospace" fontSize="11">
         Cₜ
       </text>
+
+      {/* hidden-state rail (bottom, fuchsia) */}
       <line x1={20} y1={210} x2={480} y2={210} stroke={C.fuchsia} strokeWidth={2} strokeOpacity={0.8} />
       <text x={18} y={228} fill={C.muted} fontFamily="monospace" fontSize="11">
         hₜ₋₁
@@ -515,20 +531,8 @@ export function LSTMDiagram() {
       <text x={468} y={228} textAnchor="end" fill={C.fuchsia} fontFamily="monospace" fontSize="11">
         hₜ
       </text>
-      {[150, 220, 290, 360].map((x, i) => (
-        <line
-          key={i}
-          x1={x}
-          y1={128}
-          x2={x}
-          y2={i === 0 || i === 3 ? 210 : 172}
-          stroke="rgba(255,255,255,0.25)"
-          strokeDasharray={i === 1 || i === 2 ? "3 3" : undefined}
-        />
-      ))}
-      <Op x={150} glyph="×" />
-      <Op x={330} glyph="+" />
-      {/* pulse riding the cell-state line */}
+
+      {/* pulse riding the cell-state rail */}
       <motion.circle
         cy={104}
         r={3.5}
@@ -536,10 +540,16 @@ export function LSTMDiagram() {
         animate={{ cx: [20, 480] }}
         transition={{ duration: 3.4, repeat: Infinity, ease: "linear" }}
       />
-      <Gate x={150} label="fₜ" glyph="σ" color={C.fuchsia} />
+
+      {/* operators on the cell-state rail */}
+      <Op x={150} glyph="×" />
+      <Op x={325} glyph="+" />
+
+      {/* gates */}
+      <Gate x={150} label="fₜ" glyph="σ" color={C.iris} />
       <Gate x={220} label="iₜ" glyph="σ" color={C.cyan} />
       <Gate x={290} label="gₜ" glyph="tanh" color={C.cyan} />
-      <Gate x={360} label="oₜ" glyph="σ" color={C.fuchsia} />
+      <Gate x={360} label="oₜ" glyph="σ" color={C.iris} />
     </svg>
   );
 }

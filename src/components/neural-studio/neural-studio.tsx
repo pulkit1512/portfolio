@@ -6,7 +6,7 @@ import { Section, SectionHeader, Reveal } from "../primitives";
 import {
   CNNDiagram,
   ResNetDiagram,
-  EfficientNetDiagram,
+  RNNDiagram,
   LSTMDiagram,
   TransformerDiagram,
   ViTDiagram,
@@ -51,16 +51,16 @@ const architectures: Arch[] = [
     Diagram: ResNetDiagram,
   },
   {
-    id: "efficientnet",
+    id: "rnn",
     index: "03",
-    tag: "Scaling",
-    title: "EfficientNet",
-    formula: "d · wᵠ · rᵞ",
+    tag: "RNN",
+    title: "Recurrence over time",
+    formula: "hₜ = tanh(Wₓxₜ + Uhₜ₋₁ + b)",
     blurb:
-      "Balance depth, width, and resolution with a single compound coefficient instead of scaling one axis blindly.",
-    meta: "compound-scaling · mobile-ready",
+      "A single recurrent cell processes sequential information by passing hidden states through time, enabling the model to capture temporal dependencies.",
+    meta: "sequential · shared weights",
     accent: "#6ee7b7",
-    Diagram: EfficientNetDiagram,
+    Diagram: RNNDiagram,
   },
   {
     id: "lstm",

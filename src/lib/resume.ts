@@ -277,10 +277,10 @@ export const projects = [
 ] as const;
 
 export const navItems = [
+  { label: "Home", href: "#home" },
   { label: "About", href: "#about" },
   { label: "Projects", href: "#projects" },
   { label: "Neural Studio", href: "#neural-studio" },
-  { label: "Experience", href: "#experience" },
   { label: "Stack", href: "#stack" },
   { label: "Certifications", href: "#certifications" },
   { label: "Contact", href: "#contact" },

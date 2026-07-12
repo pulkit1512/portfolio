@@ -6,7 +6,7 @@
 > Design quality mirrors the reference screenshots in `reference images/` (original implementation, no copied assets/text).
 > Certificate images come only from the local `certifiate/` folder (copied into `public/certificates/`).
 
-_Last updated: 2026-07-12 (Neural Studio: added 2 large feature cards — Self-Attention + MLP — above the architecture grid; performance pass; 2 projects + repo links; scroll-offset fix)_
+_Last updated: 2026-07-12 (LSTM diagram rebuilt; EfficientNet→RNN card; Experience section removed; Home nav item added)_
 
 ---
 
@@ -224,7 +224,28 @@ Files touched this session: created `src/app/page.tsx`, `src/components/sections
 **Verified:** clean `next build` (4/4 static pages, no type/lint errors); `next start` HTTP 200; byte-offset check confirms render order **heading → Self-Attention → MLP → CNN → …**; all six existing architecture cards still present in the served HTML.
 
 ## Remaining Tasks (current)
-- **Experience content** — still intentionally EMPTY until Pulkit provides it.
 - **New project dates** — AI vs Real Image Classifier & Similar GOT Character have no `period` (none supplied; none invented).
-- **Optional browser QA** — visually confirm the two new Neural Studio feature cards against `update_neural_studio/update_1.png` in dark + light themes and at mobile/tablet widths (matrix label legibility at small sizes; MLP node spacing). Nudge SVG `fontSize`/`min-h` if needed.
+- **Optional browser QA** — visually confirm the Neural Studio feature cards (`update_1.png`) and the rebuilt **LSTM** + new **RNN** diagrams (`replace_lstm.png` / `rnn_image.png`) in dark + light themes and at mobile/tablet widths (SVG label legibility at small sizes). Nudge `fontSize`/`min-h` if needed.
 - Optional: light-mode visual QA across all sections; favicon / OG image; optional GSAP scroll effect (installed, unused).
+
+> **Note (2026-07-12):** the Experience section was **removed** at Pulkit's request — the prior "keep Experience empty until provided" item no longer applies.
+
+## Session 2026-07-12 (LSTM rebuild · EfficientNet→RNN · remove Experience · add Home nav)
+Scope was strictly limited to the four requested changes; no other section, animation, color, spacing, typography, or layout was touched. References studied from `update_neural_studio/replace_lstm.png` and `rnn_image.png` (recreated as vector SVG — images never used directly). Clean `next build` (4/4 static pages, no type/lint errors) + `next start` HTTP-200 smoke test with byte-offset ordering + section-id checks.
+
+**Files modified**
+- `src/components/neural-studio/diagrams.tsx`
+  - **LSTM diagram rebuilt** (`LSTMDiagram`, Task 1): faithful recreation of `replace_lstm.png` — `LSTM · CELL` title, dashed cell boundary, **cyan** cell-state rail (`Cₜ₋₁ → Cₜ`) carrying the `×` forget and `+` input operators, **fuchsia** hidden-state rail (`hₜ₋₁ → hₜ`), four gates on vertical stems: `fₜ` (σ, iris), `iₜ` (σ, cyan), `gₜ` (tanh, cyan), `oₜ` (σ, iris), and the existing cyan pulse riding the top rail. Rail-to-rail stems (dashed for the inner two) now connect both rails cleanly; `+` repositioned to x=325 (between `gₜ` and `oₜ`) per the reference. Only the visualization changed — the LSTM **card title, blurb, formula, index, styling, padding, animations, hover** are all untouched (card data lives in `neural-studio.tsx` and was not edited for LSTM).
+  - **`EfficientNetDiagram` removed; `RNNDiagram` added** (Task 2): a single recurrent cell unrolled across 5 time-steps — rounded cyan hidden cells `h₁…h₅`, `xₜ` input arrows from below, `yₜ` output arrows above, and animated dashed **recurrence links** (`strokeDashoffset` flow) passing state left→right. Deterministic layout, responsive `viewBox`. Added a `SUB` subscript helper; updated the module header comment (EfficientNet → RNN).
+- `src/components/neural-studio/neural-studio.tsx`
+  - Import swapped `EfficientNetDiagram → RNNDiagram`.
+  - The `efficientnet` architecture entry (slot 03) replaced by the **RNN** card: `index:"03"`, `tag:"RNN"`, `title:"Recurrence over time"`, `formula:"hₜ = tanh(Wₓxₜ + Uhₜ₋₁ + b)"`, the provided description, `meta:"sequential · shared weights"`, accent `#6ee7b7` (kept the slot's mint accent), `Diagram: RNNDiagram`. Card order preserved: CNN · ResNet · **RNN** · LSTM · Transformer · ViT. `ArchCard` shell (styling/animation/hover/spacing) unchanged, so the RNN card matches every other Neural Studio card.
+- `src/app/page.tsx` (Task 3): removed the `Experience` import and `<Experience />` render — sections below (Stack → Certifications → Contact) flow up naturally; no empty gap.
+- `src/lib/resume.ts` (Tasks 3 + 4): `navItems` — removed `{ Experience → #experience }`; **added `{ Home → #home }` as the first item**. `#home` targets the existing Hero `id="home"`, so the navbar's existing `IntersectionObserver` now highlights **Home** as active while the Hero is in view (no navbar code change needed — it maps over `navItems`, and smooth scroll + the layout-animated active pill apply identically).
+
+**Files deleted**
+- `src/components/sections/experience.tsx` — the Experience section component (and its placeholder timeline) removed entirely. Verified no remaining `Experience`/`#experience`/`EfficientNet` references in `src/` (except unrelated prose in the résumé summary).
+
+**Verification**
+- `next build` clean (4/4 static pages, no type/lint errors); First Load JS 157 kB.
+- `next start` HTTP 200. Byte-offset order confirmed **CNN → ResNet → RNN (Recurrence over time) → LSTM → Transformer → ViT**; `RNN` + `hₜ = tanh` present, `EfficientNet`/`compound scaling` absent. `id="experience"` count **0**; all remaining ids present (`home, about, projects, neural-studio, stack, certifications, contact`). Nav shows **Home** first (desktop + mobile), no Experience link.
