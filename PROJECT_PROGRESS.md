@@ -6,7 +6,7 @@
 > Design quality mirrors the reference screenshots in `reference images/` (original implementation, no copied assets/text).
 > Certificate images come only from the local `certifiate/` folder (copied into `public/certificates/`).
 
-_Last updated: 2026-07-12 (performance pass: pause off-screen Three.js loop + AVIF images; added 2 projects + repo links; fixed navbar→section scroll-offset gap)_
+_Last updated: 2026-07-12 (Neural Studio: added 2 large feature cards — Self-Attention + MLP — above the architecture grid; performance pass; 2 projects + repo links; scroll-offset fix)_
 
 ---
 
@@ -201,3 +201,30 @@ Files touched this session: created `src/app/page.tsx`, `src/components/sections
 - **No new dependencies** were introduced this or last session; First Load JS is unchanged at **156 kB** (item 19).
 
 **Verified:** clean `next build` (4/4 static pages, no type/lint errors); `next start` smoke test HTTP 200; AVIF/WebP content-negotiation confirmed via `curl` Accept headers; hero animation still runs while the hero is in view and freezes when scrolled away. Scrolling, hover (project/arch cards), and nav-link jumps remain smooth with the WebGL loop no longer contending for frames off-screen.
+
+### Session 2026-07-12 (Neural Studio — two large feature cards added on top)
+**Goal.** Per a new reference image (`update_neural_studio/update_1.png`), add two premium feature cards to the **top** of the Neural Studio section — above the existing 6-card architecture grid — without redesigning anything else. New section order: heading → **[Self-Attention | MLP]** → CNN, ResNet, EfficientNet, LSTM, Transformer, ViT (all existing content untouched).
+
+**New component created:**
+- **`src/components/neural-studio/feature-cards.tsx`** — exports `NeuralStudioFeatures` (the responsive 2-up row) plus internal building blocks:
+  - `FeatureCard` — the shared card shell. Reuses the **exact chrome of `ArchCard`** (`card-surface`, `rounded-3xl`, `shadow-card`, hover `y:-6` spring lift, radial accent glow + top accent line on hover, bordered `bg-black/25` viz stage with a faint `bg-grid`) so the two new cards read as the same family as the grid below. Header = `mono-label` eyebrow (`NN · TAG`) left + accent-coloured mono formula right; large title (`text-2xl md:text-[28px]`); muted description.
+  - `AttentionMatrix` — a hand-built **SVG** 12×12 self-attention heatmap over a token sequence ("The model learns to attend to every token in the long sequence"). Weights are a **deterministic** soft-diagonal band + attention sink + hashed noise (no `Math.random` → SSR/CSR identical, no hydration mismatch), colour-mapped dark-slate → purple → magenta. Right-aligned row labels + rotated (-45°) column labels, all in `font-mono`/`text-muted`.
+  - `QKVPanels` — three stacked bordered panels (Queries/Keys/Values) with big accent letters **Q** (`#7dd3fc`), **K** (`#f0abfc`), **V** (`#6ee7b7`) and `→ "the/model/learns"`.
+  - `MLPDiagram` — a hand-built **SVG** feed-forward net, layers d=4·7·6·3, full faint mesh + two highlighted cyan forward paths with a light `strokeDashoffset` flow (6 animated lines only), ring nodes with active cyan centres, `INPUT/H1/H2/OUTPUT` labels on top and `d=…` labels on the bottom. Card 1 formula `softmax(QKᵀ / √dₖ) · V`; Card 2 formula `y = σ(Wx + b)`.
+- **Card 1 accent** iris `#a78bfa`, **Card 2 accent** cyan `#7dd3fc` — both already in the palette; nothing new introduced.
+
+**Files modified:**
+- `src/components/neural-studio/neural-studio.tsx` — imported `NeuralStudioFeatures`; rendered it in a `mt-14` block **between** the `SectionHeader` and the architecture grid; changed the grid's top margin `mt-14 → mt-6` so the gap between the feature row and the grid matches the intra-grid `gap-6` rhythm (seamless transition). No architecture data or `ArchCard` markup changed.
+- `PROJECT_PROGRESS.md` — this entry.
+
+**Responsiveness:** `NeuralStudioFeatures` is `grid gap-6 lg:grid-cols-2` → two cards side-by-side on desktop, stacked on tablet/mobile. Inside Card 1, the matrix + Q/K/V is `md:grid-cols-[1.4fr_1fr]` → side-by-side on ≥md, stacked (matrix over Q/K/V) below. Both SVGs use `viewBox` + `preserveAspectRatio` with `h-full w-full` and a `min-h-[240px] md:min-h-[300px]` stage, so they scale fluidly.
+
+**Performance:** visuals are static SVG except the single `group-hover` viz scale and 6 lightweight `strokeDashoffset` lines on the MLP (consistent with the existing animated diagrams). No canvas/WebGL, no new dependency, deterministic data computed once at module scope. First Load JS **156 → 158 kB**, page `/` **68.8 → 70.6 kB**.
+
+**Verified:** clean `next build` (4/4 static pages, no type/lint errors); `next start` HTTP 200; byte-offset check confirms render order **heading → Self-Attention → MLP → CNN → …**; all six existing architecture cards still present in the served HTML.
+
+## Remaining Tasks (current)
+- **Experience content** — still intentionally EMPTY until Pulkit provides it.
+- **New project dates** — AI vs Real Image Classifier & Similar GOT Character have no `period` (none supplied; none invented).
+- **Optional browser QA** — visually confirm the two new Neural Studio feature cards against `update_neural_studio/update_1.png` in dark + light themes and at mobile/tablet widths (matrix label legibility at small sizes; MLP node spacing). Nudge SVG `fontSize`/`min-h` if needed.
+- Optional: light-mode visual QA across all sections; favicon / OG image; optional GSAP scroll effect (installed, unused).

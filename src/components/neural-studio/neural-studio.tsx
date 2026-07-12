@@ -11,6 +11,7 @@ import {
   TransformerDiagram,
   ViTDiagram,
 } from "./diagrams";
+import { NeuralStudioFeatures } from "./feature-cards";
 
 type Arch = {
   id: string;
@@ -109,7 +110,13 @@ export function NeuralStudio() {
           description="A visual index of the model families I work with — from the humble CNN to the transformer block that reshaped the field. Every diagram is drawn from scratch."
         />
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-2">
+        {/* Two large feature cards — self-attention + MLP — above the grid. */}
+        <div className="mt-14">
+          <NeuralStudioFeatures />
+        </div>
+
+        {/* Existing architecture index grid. */}
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {architectures.map((a, i) => (
             <Reveal key={a.id} delay={0.05 * (i % 2)}>
               <ArchCard arch={a} />
