@@ -8,6 +8,17 @@
   --fg: #e8eaf0;
   --muted: #8b90a0;
   --line: rgba(255, 255, 255, 0.08);
+
+  /* Neural Studio diagram palette (dark theme — unchanged from original). */
+  --nd-stage: rgba(0, 0, 0, 0.25);
+  --nd-cyan: #7dd3fc;
+  --nd-iris: #a78bfa;
+  --nd-fuchsia: #f0abfc;
+  --nd-mint: #6ee7b7;
+  --nd-node: #0a0c12;
+  --nd-line: rgba(255, 255, 255, 0.22);
+  --nd-line-faint: rgba(255, 255, 255, 0.1);
+  --nd-line-strong: rgba(255, 255, 255, 0.55);
 }
 
 .light {
@@ -16,6 +27,19 @@
   --fg: #14161d;
   --muted: #5a6072;
   --line: rgba(10, 12, 20, 0.1);
+
+  /* Neural Studio diagram palette (light theme — darker, saturated ink so
+     nodes, lines, labels and equations stay high-contrast on light cards.
+     Not an inversion: deliberately chosen accessible hues per element. */
+  --nd-stage: rgba(10, 12, 20, 0.035);
+  --nd-cyan: #0e7490;
+  --nd-iris: #6d28d9;
+  --nd-fuchsia: #a21caf;
+  --nd-mint: #047857;
+  --nd-node: #ffffff;
+  --nd-line: rgba(10, 12, 20, 0.42);
+  --nd-line-faint: rgba(10, 12, 20, 0.22);
+  --nd-line-strong: rgba(10, 12, 20, 0.6);
 }
 
 * {

@@ -14,12 +14,18 @@ const rand = (a: number, b: number) => {
   return s - Math.floor(s);
 };
 
+/**
+ * Theme-aware palette — resolves to the dark values in dark mode (identical to
+ * the original hex) and to darker, saturated ink in light mode via the
+ * `--nd-*` CSS variables (see globals.css). SVG `fill`/`stroke`/`stop-color`
+ * all accept `var(--…)`, so every diagram adapts to the theme automatically.
+ */
 const C = {
-  cyan: "#7dd3fc",
-  iris: "#a78bfa",
-  fuchsia: "#f0abfc",
-  mint: "#6ee7b7",
-  muted: "#8b90a0",
+  cyan: "var(--nd-cyan)",
+  iris: "var(--nd-iris)",
+  fuchsia: "var(--nd-fuchsia)",
+  mint: "var(--nd-mint)",
+  muted: "var(--muted)",
 };
 
 /* Unicode subscripts for time-step labels (h₁ … x₅). */
@@ -52,7 +58,7 @@ function FeatureTile({ id }: { id: number }) {
   const phase = rand(id, 5) * 6;
   return (
     <div
-      className="grid overflow-hidden rounded-md border border-white/10"
+      className="grid overflow-hidden rounded-md border border-line"
       style={{ gridTemplateColumns: `repeat(${P}, 1fr)`, aspectRatio: "1" }}
     >
       {Array.from({ length: P * P }, (_, k) => {
@@ -88,12 +94,12 @@ export function CNNDiagram() {
       <div className="flex items-center gap-2 font-mono text-[9px] text-muted">
         <span
           className="inline-block h-2 w-2 rounded-[2px]"
-          style={{ background: "rgba(125,211,252,0.7)" }}
+          style={{ background: "var(--nd-cyan)" }}
         />
         activation +
         <span
           className="inline-block h-2 w-2 rounded-[2px]"
-          style={{ background: "rgba(240,171,252,0.7)" }}
+          style={{ background: "var(--nd-fuchsia)" }}
         />
         activation −
       </div>
@@ -122,12 +128,12 @@ export function ResNetDiagram() {
         y1={y}
         x2={445}
         y2={y}
-        stroke="rgba(255,255,255,0.1)"
+        stroke="var(--nd-line-faint)"
         strokeWidth={2}
       />
 
       {/* input */}
-      <circle cx={40} cy={y} r={7} fill="#0a0c12" stroke={C.iris} />
+      <circle cx={40} cy={y} r={7} fill="var(--nd-node)" stroke={C.iris} />
       <text
         x={40}
         y={y + 26}
@@ -146,7 +152,7 @@ export function ResNetDiagram() {
         width={94}
         height={48}
         rx={10}
-        fill="rgba(167,139,250,0.08)"
+        fill="color-mix(in srgb, var(--nd-iris) 12%, transparent)"
         stroke={C.iris}
         strokeOpacity={0.5}
       />
@@ -190,7 +196,7 @@ export function ResNetDiagram() {
         width={94}
         height={48}
         rx={10}
-        fill="rgba(167,139,250,0.08)"
+        fill="color-mix(in srgb, var(--nd-iris) 12%, transparent)"
         stroke={C.iris}
         strokeOpacity={0.5}
       />
@@ -220,7 +226,7 @@ export function ResNetDiagram() {
         cx={394}
         cy={y}
         r={15}
-        fill="#0a0c12"
+        fill="var(--nd-node)"
         stroke={C.fuchsia}
         strokeWidth={1.4}
       />
@@ -401,7 +407,7 @@ export function RNNDiagram() {
             width={half * 2}
             height={half * 2}
             rx={10}
-            fill="#0a0c12"
+            fill="var(--nd-node)"
             stroke={C.cyan}
             strokeWidth={1.4}
           />
@@ -437,7 +443,7 @@ function Gate({
   const cy = 150;
   return (
     <g>
-      <circle cx={x} cy={cy} r={22} fill="#0a0c12" stroke={color} strokeWidth={1.4} />
+      <circle cx={x} cy={cy} r={22} fill="var(--nd-node)" stroke={color} strokeWidth={1.4} />
       <text x={x} y={cy + 5} textAnchor="middle" fill="currentColor" fontSize="14">
         {glyph}
       </text>
@@ -458,7 +464,7 @@ function Gate({
 function Op({ x, glyph }: { x: number; glyph: string }) {
   return (
     <g>
-      <circle cx={x} cy={104} r={11} fill="#0a0c12" stroke="rgba(255,255,255,0.55)" />
+      <circle cx={x} cy={104} r={11} fill="var(--nd-node)" stroke="var(--nd-line-strong)" />
       <text x={x} y={109} textAnchor="middle" fill="currentColor" fontSize="13">
         {glyph}
       </text>
@@ -497,7 +503,7 @@ export function LSTMDiagram() {
         height={150}
         rx={22}
         fill="none"
-        stroke="rgba(255,255,255,0.18)"
+        stroke="var(--nd-line)"
         strokeDasharray="5 5"
       />
 
@@ -509,7 +515,7 @@ export function LSTMDiagram() {
           y1={104}
           x2={x}
           y2={210}
-          stroke="rgba(255,255,255,0.22)"
+          stroke="var(--nd-line)"
           strokeDasharray={i === 1 || i === 2 ? "3 3" : undefined}
         />
       ))}
@@ -565,14 +571,19 @@ function TBlock({
   sub: string;
   tint?: "iris" | "cyan";
 }) {
-  const style =
-    tint === "iris"
-      ? "border-iris/40 bg-[rgba(167,139,250,0.08)]"
-      : tint === "cyan"
-      ? "border-cyan-soft/40 bg-[rgba(125,211,252,0.07)]"
-      : "border-white/12 bg-white/[0.02]";
+  const accent =
+    tint === "iris" ? "var(--nd-iris)" : tint === "cyan" ? "var(--nd-cyan)" : null;
+  const style = accent
+    ? {
+        borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
+        background: `color-mix(in srgb, ${accent} 10%, transparent)`,
+      }
+    : { borderColor: "var(--line)", background: "var(--nd-stage)" };
   return (
-    <div className={`relative z-10 rounded-lg border px-4 py-2.5 text-center ${style}`}>
+    <div
+      className="relative z-10 rounded-lg border px-4 py-2.5 text-center"
+      style={style}
+    >
       <div className="font-mono text-[13px] text-[var(--fg)]">{title}</div>
       <div className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-muted">
         {sub}
@@ -588,7 +599,7 @@ export function TransformerDiagram() {
         Transformer · Encoder Block
       </span>
       <div className="relative w-full max-w-[260px]">
-        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/10" />
+        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[var(--nd-line-faint)]" />
         <div className="relative flex flex-col gap-2.5">
           <TBlock title="Multi-Head Attn" sub="h=12 · d=64" tint="iris" />
           <TBlock title="Add & Norm" sub="residual" />
@@ -599,7 +610,7 @@ export function TransformerDiagram() {
       <div className="mt-3 flex items-center gap-1 font-mono text-[11px] text-muted">
         <span>× N</span>
         <motion.span
-          className="text-cyan-soft"
+          style={{ color: "var(--nd-cyan)" }}
           animate={{ y: [0, 3, 0], opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         >

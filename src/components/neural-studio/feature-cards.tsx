@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Reveal } from "../primitives";
+import { useTheme } from "../theme-provider";
 
 /**
  * Neural Studio — two large feature cards that sit ABOVE the architecture grid.
@@ -40,7 +41,7 @@ function FeatureCard({
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(40rem 22rem at 85% -10%, ${accent}22, transparent 60%)`,
+          background: `radial-gradient(40rem 22rem at 85% -10%, color-mix(in srgb, ${accent} 13%, transparent), transparent 60%)`,
         }}
       />
       {/* top accent line */}
@@ -71,7 +72,7 @@ function FeatureCard({
 
       {/* visualization stage */}
       <div className="relative mt-6 flex-1">
-        <div className="relative overflow-hidden rounded-2xl border border-line bg-black/25 p-4 md:p-5">
+        <div className="relative overflow-hidden rounded-2xl border border-line bg-[var(--nd-stage)] p-4 md:p-5">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
           <div className="relative transition-transform duration-500 ease-out group-hover:scale-[1.01]">
             {children}
@@ -105,13 +106,25 @@ function weight(i: number, j: number) {
   return Math.min(1, diag * 0.92 + sink + noise * 0.6 + 0.04);
 }
 
-// dark-slate → purple → magenta ramp (all from the existing palette).
-function heat(v: number) {
-  const stops: [number, number, number][] = [
+// Theme-aware heat ramp. Dark: slate → purple → magenta (unchanged original).
+// Light: pale lavender → violet → deep magenta, so low cells stay subtle and
+// high cells read with strong contrast against the light panel (not inverted —
+// each stop is picked for readability).
+const HEAT_STOPS: Record<"dark" | "light", [number, number, number][]> = {
+  dark: [
     [18, 22, 32],
     [124, 92, 168],
     [240, 171, 252],
-  ];
+  ],
+  light: [
+    [226, 228, 238],
+    [150, 104, 205],
+    [156, 26, 168],
+  ],
+};
+
+function heat(v: number, theme: "dark" | "light") {
+  const stops = HEAT_STOPS[theme];
   const t = Math.max(0, Math.min(1, v));
   let a: [number, number, number], b: [number, number, number], seg: number;
   if (t < 0.55) {
@@ -130,6 +143,7 @@ function heat(v: number) {
 const MATRIX = TOKENS.map((_, i) => TOKENS.map((_, j) => weight(i, j)));
 
 function AttentionMatrix() {
+  const { theme } = useTheme();
   const n = TOKENS.length;
   const x0 = 46;
   const y0 = 4;
@@ -155,8 +169,8 @@ function AttentionMatrix() {
             width={cell - pad * 2}
             height={cell - pad * 2}
             rx={1.5}
-            fill={heat(v)}
-            opacity={0.35 + v * 0.65}
+            fill={heat(v, theme === "light" ? "light" : "dark")}
+            opacity={(theme === "light" ? 0.5 : 0.35) + v * (theme === "light" ? 0.5 : 0.65)}
           />
         ))
       )}
@@ -207,9 +221,9 @@ function AttentionMatrix() {
 }
 
 const QKV = [
-  { label: "Queries", letter: "Q", color: "#7dd3fc", word: "the" },
-  { label: "Keys", letter: "K", color: "#f0abfc", word: "model" },
-  { label: "Values", letter: "V", color: "#6ee7b7", word: "learns" },
+  { label: "Queries", letter: "Q", color: "var(--nd-cyan)", word: "the" },
+  { label: "Keys", letter: "K", color: "var(--nd-fuchsia)", word: "model" },
+  { label: "Values", letter: "V", color: "var(--nd-mint)", word: "learns" },
 ];
 
 function QKVPanels() {
@@ -218,7 +232,7 @@ function QKVPanels() {
       {QKV.map((p) => (
         <div
           key={p.letter}
-          className="rounded-xl border border-line bg-black/20 px-4 py-3 transition-colors duration-500 group-hover:border-white/10"
+          className="rounded-xl border border-line bg-[var(--nd-stage)] px-4 py-3 transition-colors duration-500 group-hover:border-white/10"
         >
           <span className="mono-label">{p.label}</span>
           <div className="mt-1.5 flex items-baseline gap-2">
@@ -295,14 +309,14 @@ function MLPDiagram() {
       aria-label="Feed-forward network with layer sizes 4, 7, 6 and 3"
     >
       {/* base mesh */}
-      <g stroke="rgba(255,255,255,0.07)" strokeWidth={0.6}>
+      <g stroke="var(--nd-line-faint)" strokeWidth={0.6}>
         {MLP_EDGES.map((e, i) => (
           <line key={`e-${i}`} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} />
         ))}
       </g>
 
       {/* highlighted flowing paths */}
-      <g stroke="#7dd3fc" strokeWidth={1.1} strokeLinecap="round">
+      <g stroke="var(--nd-cyan)" strokeWidth={1.1} strokeLinecap="round">
         {HL_EDGES.map((e, i) => (
           <motion.line
             key={`h-${i}`}
@@ -329,15 +343,19 @@ function MLPDiagram() {
                 cx={nd.x}
                 cy={nd.y}
                 r={6.5}
-                fill="#0a0c12"
-                stroke={active ? "#7dd3fc" : "rgba(255,255,255,0.28)"}
+                fill="var(--nd-node)"
+                stroke={active ? "var(--nd-cyan)" : "var(--nd-line)"}
                 strokeWidth={1.2}
               />
               <circle
                 cx={nd.x}
                 cy={nd.y}
                 r={2.4}
-                fill={active ? "#7dd3fc" : "rgba(125,211,252,0.35)"}
+                fill={
+                  active
+                    ? "var(--nd-cyan)"
+                    : "color-mix(in srgb, var(--nd-cyan) 40%, transparent)"
+                }
               />
             </g>
           );
@@ -391,7 +409,7 @@ export function NeuralStudioFeatures() {
           formula="softmax(QKᵀ / √dₖ) · V"
           title="Scaled dot-product attention"
           description="Every token gets to query every other token. Heavy upfront — O(n²) — but parallelizable, and the inductive bias that unlocked LLMs."
-          accent="#a78bfa"
+          accent="var(--nd-iris)"
         >
           <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
             <div className="min-h-[240px] w-full md:min-h-[300px]">
@@ -409,7 +427,7 @@ export function NeuralStudioFeatures() {
           formula="y = σ(Wx + b)"
           title="Feed-forward, the workhorse"
           description="Stacked linear + nonlinearity. Old, simple, and 60% of the FLOPs in every transformer block."
-          accent="#7dd3fc"
+          accent="var(--nd-cyan)"
         >
           <div className="min-h-[240px] w-full md:min-h-[300px]">
             <MLPDiagram />

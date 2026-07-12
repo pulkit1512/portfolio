@@ -28,74 +28,74 @@ type Arch = {
 const architectures: Arch[] = [
   {
     id: "cnn",
-    index: "01",
+    index: "03",
     tag: "Convolution",
     title: "Convolutional Network",
     formula: "conv(x, W) + b",
     blurb:
       "Local receptive fields and weight sharing build a hierarchy of feature maps. Still the right answer when the input is pixels.",
     meta: "spatial · translation-invariant",
-    accent: "#7dd3fc",
+    accent: "var(--nd-cyan)",
     Diagram: CNNDiagram,
   },
   {
     id: "resnet",
-    index: "02",
+    index: "04",
     tag: "Residual",
     title: "Residual Network",
     formula: "y = F(x) + x",
     blurb:
       "Identity shortcuts let gradients skip layers, so depth can grow without the signal vanishing. Depth became free.",
     meta: "skip-connections · very deep",
-    accent: "#a78bfa",
+    accent: "var(--nd-iris)",
     Diagram: ResNetDiagram,
   },
   {
     id: "rnn",
-    index: "03",
+    index: "05",
     tag: "RNN",
     title: "Recurrence over time",
     formula: "hₜ = tanh(Wₓxₜ + Uhₜ₋₁ + b)",
     blurb:
       "A single recurrent cell processes sequential information by passing hidden states through time, enabling the model to capture temporal dependencies.",
     meta: "sequential · shared weights",
-    accent: "#6ee7b7",
+    accent: "var(--nd-mint)",
     Diagram: RNNDiagram,
   },
   {
     id: "lstm",
-    index: "04",
+    index: "06",
     tag: "Recurrence",
     title: "Long Short-Term Memory",
     formula: "Cₜ = fₜ·Cₜ₋₁ + iₜ·C̃ₜ",
     blurb:
       "Forget, input, output. Add a carry line and long-range dependencies in sequences suddenly become tractable.",
     meta: "gated · sequential memory",
-    accent: "#f0abfc",
+    accent: "var(--nd-fuchsia)",
     Diagram: LSTMDiagram,
   },
   {
     id: "transformer",
-    index: "05",
+    index: "07",
     tag: "Attention",
     title: "Transformer",
     formula: "softmax(QKᵀ/√dₖ)·V",
     blurb:
       "Attention + FFN + residual + norm, repeated N times. Every token queries every other token — the block that ate the world.",
     meta: "parallel · Vaswani et al., 2017",
-    accent: "#a78bfa",
+    accent: "var(--nd-iris)",
     Diagram: TransformerDiagram,
   },
   {
     id: "vit",
-    index: "06",
+    index: "08",
     tag: "Vision",
     title: "Vision Transformer",
     formula: "patch → embed → +pos",
     blurb:
       "Cut the image into patches, treat them as tokens, and let self-attention do the rest. Convolution-free vision at scale.",
     meta: "patchify · global-attention",
-    accent: "#7dd3fc",
+    accent: "var(--nd-cyan)",
     Diagram: ViTDiagram,
   },
 ];
@@ -144,7 +144,7 @@ function ArchCard({ arch }: { arch: Arch }) {
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(38rem 20rem at 85% -10%, ${arch.accent}22, transparent 60%)`,
+          background: `radial-gradient(38rem 20rem at 85% -10%, color-mix(in srgb, ${arch.accent} 13%, transparent), transparent 60%)`,
         }}
       />
       {/* top accent line */}
@@ -178,7 +178,7 @@ function ArchCard({ arch }: { arch: Arch }) {
 
       {/* diagram stage */}
       <div className="relative mt-5 flex-1">
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-line bg-black/25">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-line bg-[var(--nd-stage)]">
           <div className="bg-grid absolute inset-0 opacity-40" />
           <motion.div
             className="relative h-full w-full p-4"

@@ -6,7 +6,7 @@
 > Design quality mirrors the reference screenshots in `reference images/` (original implementation, no copied assets/text).
 > Certificate images come only from the local `certifiate/` folder (copied into `public/certificates/`).
 
-_Last updated: 2026-07-12 (LSTM diagram rebuilt; EfficientNet→RNN card; Experience section removed; Home nav item added)_
+_Last updated: 2026-07-12 (clean root URL for Home; theme-aware Neural Studio diagrams for light mode; sequential Neural Studio numbering)_
 
 ---
 
@@ -225,8 +225,8 @@ Files touched this session: created `src/app/page.tsx`, `src/components/sections
 
 ## Remaining Tasks (current)
 - **New project dates** — AI vs Real Image Classifier & Similar GOT Character have no `period` (none supplied; none invented).
-- **Optional browser QA** — visually confirm the Neural Studio feature cards (`update_1.png`) and the rebuilt **LSTM** + new **RNN** diagrams (`replace_lstm.png` / `rnn_image.png`) in dark + light themes and at mobile/tablet widths (SVG label legibility at small sizes). Nudge `fontSize`/`min-h` if needed.
-- Optional: light-mode visual QA across all sections; favicon / OG image; optional GSAP scroll effect (installed, unused).
+- **Optional browser QA** — confirm the Neural Studio diagrams in **light mode** on a real browser (the fix was verified via build + CSS-variable inspection; a visual pass across all 8 cards is still worthwhile). Also spot-check that `color-mix()` renders on the target browsers (used for hover glows / a few tints; modern-browser feature with graceful degradation).
+- Optional: favicon / OG image; optional GSAP scroll effect (installed, unused).
 
 > **Note (2026-07-12):** the Experience section was **removed** at Pulkit's request — the prior "keep Experience empty until provided" item no longer applies.
 
@@ -249,3 +249,24 @@ Scope was strictly limited to the four requested changes; no other section, anim
 **Verification**
 - `next build` clean (4/4 static pages, no type/lint errors); First Load JS 157 kB.
 - `next start` HTTP 200. Byte-offset order confirmed **CNN → ResNet → RNN (Recurrence over time) → LSTM → Transformer → ViT**; `RNN` + `hₜ = tanh` present, `EfficientNet`/`compound scaling` absent. `id="experience"` count **0**; all remaining ids present (`home, about, projects, neural-studio, stack, certifications, contact`). Nav shows **Home** first (desktop + mobile), no Experience link.
+
+## Session 2026-07-12 (clean Home URL · light-mode diagram contrast · sequential numbering)
+Three targeted fixes only; no redesign, and no change to animations, spacing, typography, layout, responsiveness, hover effects, or section order. **Dark mode is byte-for-byte unchanged** (verified: the new `--nd-*` dark values equal the original hard-coded colors). Clean `next build` + `next start` HTTP-200 smoke tests.
+
+**1 · Remove `#home` from the URL** — `src/components/navbar.tsx`
+- Added a `handleNav(e, href)` click handler. For `href === "#home"` it calls `e.preventDefault()`, `window.scrollTo({ top: 0, behavior: "smooth" })`, sets the active item, and **`history.replaceState(null, "", pathname + search)`** so the address bar stays the clean root URL (`/`) — never `/#home`. All other links keep their normal hash behaviour, so browser back/forward still works. Wired onto the brand logo, every desktop nav link, and every mobile nav link (the mobile handler also closes the menu). Active highlighting is preserved (the existing `IntersectionObserver` still lights up Home when the Hero is in view). Imported `type MouseEvent` from React for the handler signature.
+
+**2 · Fix Neural Studio diagrams in light mode (light theme only)** — `src/app/globals.css`, `src/components/neural-studio/diagrams.tsx`, `feature-cards.tsx`, `neural-studio.tsx`
+- Introduced a **theme-aware diagram palette** as CSS variables in `globals.css`: `--nd-stage`, `--nd-cyan`, `--nd-iris`, `--nd-fuchsia`, `--nd-mint`, `--nd-node`, `--nd-line`, `--nd-line-faint`, `--nd-line-strong`. Dark values are identical to the originals; the `.light` overrides use **darker, saturated ink** (cyan `#0e7490`, iris `#6d28d9`, fuchsia `#a21caf`, mint `#047857`), dark translucent lines (`rgba(10,12,20,·)`), a near-white node fill (`#ffffff`) so nodes read as hollow rings, and a light stage (`rgba(10,12,20,.035)`). Not an inversion — each element got a purpose-picked accessible hue.
+- `diagrams.tsx`: the shared `C` palette now points at `var(--nd-*)`; replaced every hard-coded `rgba(255,255,255,·)` line, `#0a0c12` node fill, iris tint, CNN tile border, Transformer spine, and the `× N` accent with theme variables/`color-mix`. Refactored `TBlock` (Transformer) to theme-aware inline styles so its blocks stay visible on light cards. CNN feature-map tiles keep their self-contained dark mini-canvas (high-contrast in both themes) by design. Applies to **all** cards: ResNet, RNN, LSTM, Transformer, ViT (SVG) + CNN.
+- `feature-cards.tsx` (Self-Attention + Feed-Forward/MLP): stage bg → `var(--nd-stage)`; MLP mesh/nodes/paths and Q/K/V accents → theme variables; hover glow uses `color-mix`. The **attention heatmap** now has a theme-aware ramp (`useTheme()`): dark = original slate→purple→magenta; light = pale-lavender→violet→deep-magenta with a raised opacity floor so low cells stay subtle but structure is legible. (`theme` defaults to `dark` on server + first client paint → no hydration mismatch; re-renders to light after mount.)
+- `neural-studio.tsx`: `ArchCard` diagram stage → `var(--nd-stage)`; hover glow switched from `${accent}22` hex-alpha to `color-mix(in srgb, ${accent} 13%, transparent)` so accents can be theme variables; each architecture's `accent` is now a `var(--nd-*)` (so the header **equation**, top line, and meta dot are readable in both themes).
+
+**3 · Fix Neural Studio numbering** — `src/components/neural-studio/neural-studio.tsx`
+- Renumbered the architecture grid so the whole section is sequential across all 8 cards (feature cards keep 01–02): CNN `01→03`, ResNet `02→04`, RNN `03→05`, LSTM `04→06`, Transformer `05→07`, ViT `06→08`. Final order verified in served HTML: **01 Self-Attention · 02 MLP · 03 Convolution · 04 Residual · 05 RNN · 06 Recurrence(LSTM) · 07 Attention(Transformer) · 08 Vision(ViT)** — no duplicates, no skips. (Projects-section eyebrows are a separate, untouched numbering.)
+
+**Verification**
+- `next build` clean (no type/lint errors); First Load JS 158 kB.
+- CSS inspection: dark `--nd-*` equal the original hex/rgba (dark unchanged); `.light` overrides present and darker/saturated.
+- Served-HTML check: sequential 01–08 Neural Studio numbering; `handleNav` + `history.replaceState` present in the navbar bundle.
+- Not done here (no browser/GPU in this env): a live visual pass of light mode and a click-test of the Home URL behaviour — recommended as manual QA.

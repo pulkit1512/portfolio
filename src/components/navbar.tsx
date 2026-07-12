@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import { navItems, profile } from "@/lib/resume";
@@ -36,6 +36,23 @@ export function Navbar() {
     return () => obs.disconnect();
   }, []);
 
+  // Home is a special case: smooth-scroll to the top of the Hero and keep the
+  // URL clean (root "/", never "/#home") via history.replaceState instead of a
+  // hash jump. All other links keep their normal in-page hash behaviour, so
+  // browser back/forward still works and active highlighting is preserved.
+  const handleNav = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    setOpen(false);
+    if (href !== "#home") return;
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setActive("#home");
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.search
+    );
+  };
+
   return (
     <header
       className={cn(
@@ -53,7 +70,11 @@ export function Navbar() {
           )}
         >
           {/* Brand */}
-          <a href="#home" className="group flex items-center gap-3">
+          <a
+            href="#home"
+            onClick={(e) => handleNav(e, "#home")}
+            className="group flex items-center gap-3"
+          >
             <span className="relative grid h-9 w-9 place-items-center rounded-full bg-iris-gradient text-[13px] font-bold text-black">
               {profile.initials}
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--bg)] bg-mint" />
@@ -69,6 +90,7 @@ export function Navbar() {
               <a
                 key={item.href}
                 href={item.href}
+                onClick={(e) => handleNav(e, item.href)}
                 className={cn(
                   "relative rounded-full px-3.5 py-2 text-sm text-muted transition-colors hover:text-[var(--fg)]",
                   active === item.href && "text-[var(--fg)]"
@@ -132,7 +154,7 @@ export function Navbar() {
                 <a
                   key={item.href}
                   href={item.href}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => handleNav(e, item.href)}
                   className="rounded-xl px-4 py-3 text-sm text-muted transition-colors hover:bg-white/5 hover:text-[var(--fg)]"
                 >
                   {item.label}
