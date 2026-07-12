@@ -19,7 +19,9 @@
       "Bash(cp \"project_image/cricket.png\" public/assets/projects/ai-match-predictor.png)",
       "Bash(cp \"project_image/miindsettler.png\" public/assets/projects/mindsettler.png)",
       "Bash(cp \"project_image/face_mask.png\" public/assets/projects/maskdetect.png)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(cp \"project_image/ai-vs-real-image-classification.png\" \"public/assets/projects/ai-vs-real-image-classifier.png\")",
+      "Bash(cp \"project_image/similar-got-character.png\" \"public/assets/projects/similar-got-character.png\")"
     ]
   }
 }

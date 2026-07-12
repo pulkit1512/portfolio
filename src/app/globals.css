@@ -24,7 +24,12 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 90px;
+  /* Single, small scroll offset. Each Section already has generous top
+     padding, so the fixed navbar simply floats over that empty padding —
+     nav links land the section header a balanced ~40px below the navbar
+     instead of the previous ~200px gap (which stacked this value with the
+     Section's scroll-mt AND its top padding). */
+  scroll-padding-top: 1.25rem;
 }
 
 body {

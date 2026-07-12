@@ -6,7 +6,7 @@
 > Design quality mirrors the reference screenshots in `reference images/` (original implementation, no copied assets/text).
 > Certificate images come only from the local `certifiate/` folder (copied into `public/certificates/`).
 
-_Last updated: 2026-07-10 (Neural Studio rebuilt to reference-grade card grid)_
+_Last updated: 2026-07-12 (added 2 projects + repo links; fixed navbar→section scroll-offset gap)_
 
 ---
 
@@ -19,7 +19,7 @@ _Last updated: 2026-07-10 (Neural Studio rebuilt to reference-grade card grid)_
 - **Marquee** — infinite tech-skill ticker drawn from resume skills.
 - **About** — narrative, education card (SVNIT, CGPA 7.03, JEE highlights), GELU activation SVG chart, Positions of Responsibility grid (3 from resume) + north-star quote card.
 - **Neural Studio** — **[REBUILT 2026-07-10]** reference-grade **2-column grid of 6 large cards** (was a selector+single-stage; matches `reference images/` Neural Studio layout). One card per required architecture (CNN, ResNet, EfficientNet, LSTM, Transformer, ViT); each card = index·tag, accent-tinted formula, title, blurb, embedded animated SVG/CSS diagram panel (grid bg), meta pill. Per-architecture accent glow + top-line on hover, spring lift, diagram scale-on-hover, Framer reveal. All 6 diagrams are original & hand-built (3 kept: CNN feature-maps, LSTM gates, Transformer encoder block; 3 new: ResNet skip-connection w/ travelling pulse, EfficientNet compound-scaling meters, ViT patchify→tokens+positional-embedding).
-- **Projects** — now three cards with screenshot previews: *AI Match Predictor* (IPL predictive-analytics engine, ML, private), *MindSettler* (web, **live** mindsettler-taupe.vercel.app), and *MaskDetect* (face-mask CNN classifier, Deep Learning, private). Each card shows a 16:9 screenshot, resume bullets/stack, live/private/repo affordances. **[UPDATED: screenshots + MaskDetect added]**
+- **Projects** — now **five** cards with screenshot previews: *AI vs Real Image Classifier* (deep-learning AI-image detector, **live** on Render + GitHub), *Similar GOT Character* (NLP t-SNE dialogue similarity, **live** on Streamlit + GitHub), *AI Match Predictor* (IPL predictive-analytics engine, ML, GitHub), *MindSettler* (web, **live** mindsettler-taupe.vercel.app), and *MaskDetect* (face-mask CNN classifier, Deep Learning, GitHub). Each card shows a 16:9 screenshot, resume bullets/stack, and live/source/repo affordances. Status pill now shows **Live** (green) / **Source** (has public repo) / **Private** — no longer a misleading lock on repos that are public. **[UPDATED 2026-07-12: 2 new projects added; GitHub repos added to AI Match Predictor & MaskDetect]**
 - **Experience** — layout + reserved timeline placeholder only (INTENTIONALLY EMPTY per instructions). **[NEW]**
 - **Stack** — 5 skill groups from resume (Languages, Frameworks, ML, Data Science, Tools) as glass cards. **[NEW: page wired]**
 - **Certifications ("Receipts")** — cards for LeetCode 100-Days badge, LeetCode 50-Days badge, GWOC '26 certificate (local images) + Microsoft "Discover Data Analysis" (text credential). Click-to-zoom lightbox. **[NEW]**
@@ -48,6 +48,7 @@ _Last updated: 2026-07-10 (Neural Studio rebuilt to reference-grade card grid)_
 ### Assets connected
 - Resume PDF served at `/Pulkit_Sharma_Resume.pdf` (Hero "Download CV").
 - Certificate images: `public/certificates/leetcode-100-days.png`, `leetcode-50-days.png`, `gwoc-2026.jpeg` (copied from local `certifiate/` folder; mapping visually verified).
+- Project screenshots in `public/assets/projects/`: `ai-match-predictor.png`, `mindsettler.png`, `maskdetect.png`, and **[NEW 2026-07-12]** `ai-vs-real-image-classifier.png` (from `project_image/ai-vs-real-image-classification.png`), `similar-got-character.png` (from `project_image/similar-got-character.png`). All local — no remote/placeholder images. Both new images verified serving HTTP 200 through the Next image optimizer.
 
 ### Verification
 - `npx next build` — **passes** (compiled, type-checked, 4/4 static pages, no errors).
@@ -63,6 +64,13 @@ _Last updated: 2026-07-10 (Neural Studio rebuilt to reference-grade card grid)_
 - `PROJECT_PROGRESS.md` — this progress file.
 
 ## Files Modified
+### Session 2026-07-12 (2 new projects + scroll-offset fix)
+- `src/lib/resume.ts` — prepended two new projects to the `projects` array: **AI vs Real Image Classifier** (live Render demo + GitHub repo, 10-item stack) and **Similar GOT Character** (live Streamlit demo + GitHub repo, NLP/t-SNE). Added GitHub `repo` links to the existing **AI Match Predictor** and **MaskDetect** entries (previously empty). New projects have `period: ""` (no dates on record — none invented).
+- `src/components/sections/projects.tsx` — added `NLP` to the `domainIcon` map; the status pill now renders **Live** / **Source** (public repo, no lock) / **Private** so projects with a public GitHub no longer show a contradictory "Private" lock. No layout/typography changes.
+- `src/app/globals.css` — `scroll-padding-top: 90px` → `1.25rem`. The old value stacked with `Section`'s `scroll-mt-24` **and** the section's top padding, landing nav clicks ~200px below the navbar. Now a single small offset; the navbar floats over each section's empty top padding.
+- `src/components/primitives.tsx` — `Section` wrapper: removed the stacking `scroll-mt-24`; padding `py-24 md:py-32` → `pt-24 pb-24 md:pb-32` (lighter top, taller bottom) so nav landings sit a balanced ~40px below the navbar while between-section rhythm is preserved. Applies uniformly to About, Projects, Neural Studio, Experience, Stack, Certifications, Contact (all use `Section`).
+
+### Earlier
 - `src/app/globals.css` — added `.input-field` component utility (+ light-mode variant) for contact form inputs.
 - `src/components/neural-studio/diagrams.tsx` — **[REBUILT 2026-07-10]** full rewrite. Now exports exactly the 6 required architecture diagrams (`CNNDiagram`, `ResNetDiagram`, `EfficientNetDiagram`, `LSTMDiagram`, `TransformerDiagram`, `ViTDiagram`). Removed the mismatched generic set (Attention/MLP/RNN/GradientField/TokenStream) left half-done by the prior session. Added ResNet, EfficientNet, ViT from scratch; kept & lightly polished CNN/LSTM/Transformer. Fixed a non-existent `fuchsia-soft` Tailwind class (now inline rgba).
 - `src/components/neural-studio/neural-studio.tsx` — **[REBUILT 2026-07-10]** switched from selector+single-stage to the reference 2-column card grid; each card is an `ArchCard` with per-architecture accent, hover glow/lift, and its embedded diagram.
@@ -78,8 +86,10 @@ _Last updated: 2026-07-10 (Neural Studio rebuilt to reference-grade card grid)_
 
 ## Remaining Tasks
 - **Experience content** — kept EMPTY by Pulkit's decision (2026-07-10). Resume lists "AI Response Evaluator — Soul AI"; do NOT add until Pulkit provides/approves it.
+- **Projects dates** — the two new projects (AI vs Real Image Classifier, Similar GOT Character) have no `period` (empty) because no dates were provided; supply dates to fill the card footer if wanted.
+- Optional: browser visual QA of the new scroll-offset landing (dark + light) across all 7 nav sections to confirm the ~40px gap feels balanced on every viewport.
 - Optional polish passes: cross-check every section against reference screenshots for spacing/typography parity; add GSAP-driven scroll effect if desired (GSAP is installed but not yet used).
-- Optional: favicon / OG image, `public/assets/` is currently empty.
+- Optional: favicon / OG image.
 - Optional: light-mode visual QA across all sections.
 
 ### Resolved decisions (2026-07-10)
@@ -166,3 +176,11 @@ Files touched this session: created `src/app/page.tsx`, `src/components/sections
 - `resume.ts`: added `image`/`imageAlt`/`repo` fields to projects; refined AI Match Predictor tagline (IPL engine); **added MaskDetect** as a third project (Deep Learning) with content derived from its screenshot.
 - `projects.tsx`: added 16:9 `next/image` preview per card, hover zoom, gradient overlay; refactored footer to explicit `Visit site` + `Code` (GitHub) action links (supports live + repo together); switched card wrapper from full-anchor to div to avoid nested-anchor issues.
 - Verified: clean `next build` (4/4 static pages), HTTP-200 smoke test, all 3 project titles in HTML, all 3 screenshots serve 200 via the image optimizer.
+
+### Session 2026-07-12 (2 new projects + navbar scroll-offset fix)
+- **Projects (added 2):** prepended *AI vs Real Image Classifier* (TensorFlow/Keras CNN + transfer learning, FastAPI, React/TS, live on Render + GitHub) and *Similar GOT Character* (Word2Vec/TF-IDF + t-SNE dialogue similarity, live on Streamlit + GitHub) to `projects` in `resume.ts`. Both use the existing card style/animations — no new components.
+- **Projects (updated 2):** added GitHub `repo` links to *AI Match Predictor* (`AI-Match-Predictor`) and *MaskDetect* (`face_mask_detection_using_cnn`). Descriptions/UI otherwise untouched, per instructions.
+- **Images:** copied `project_image/ai-vs-real-image-classification.png` → `public/assets/projects/ai-vs-real-image-classifier.png` and `project_image/similar-got-character.png` → `public/assets/projects/similar-got-character.png`. Auto-matched by title. Local only; no placeholders/remote images.
+- **Card badge:** `projects.tsx` status pill now distinguishes **Live** / **Source** (public repo) / **Private**, so the two updated projects don't show a contradictory "Private" lock. Added `NLP` to `domainIcon`.
+- **Layout fix (scroll offset):** the navbar→section gap was caused by three stacked offsets — `html scroll-padding-top: 90px` + `Section scroll-mt-24` (96px) + the section's own `py-24/32` top padding — landing nav clicks ~200px+ below the navbar. Fixed by using a **single** small offset (`scroll-padding-top: 1.25rem`), removing `scroll-mt-24` from `Section`, and rebalancing its padding to `pt-24 pb-24 md:pb-32`. Nav links now land the section header a balanced ~40px below the navbar across all 7 sections (About, Projects, Neural Studio, Experience, Stack, Certifications, Contact — all share `Section`). No global padding slash; between-section rhythm preserved via the taller bottom padding.
+- Verified: clean `next build` (4/4 static pages, no type/lint errors), HTTP-200 smoke test — all **5** project titles in served HTML, both new screenshots serve 200 via the image optimizer, and all four GitHub repo URLs present in the HTML.

@@ -165,7 +165,12 @@ export function Section({
   return (
     <section
       id={id}
-      className={cn("relative scroll-mt-24 py-24 md:py-32", className)}
+      /* No scroll-mt here — the single scroll offset lives in globals.css
+         (scroll-padding-top). Top padding is kept lighter than the bottom so
+         nav-link landings sit a balanced distance below the fixed navbar while
+         the between-section rhythm (dominated by the taller bottom padding) is
+         preserved. */
+      className={cn("relative pt-24 pb-24 md:pb-32", className)}
     >
       {children}
     </section>

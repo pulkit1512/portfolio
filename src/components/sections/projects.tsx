@@ -8,6 +8,7 @@ import { ArrowUpRight, BrainCircuit, Globe, Lock, Github } from "lucide-react";
 const domainIcon: Record<string, typeof BrainCircuit> = {
   "Machine Learning": BrainCircuit,
   "Deep Learning": BrainCircuit,
+  NLP: BrainCircuit,
   "Web Platform": Globe,
 };
 
@@ -86,6 +87,10 @@ export function Projects() {
                               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-mint" />
                             </span>
                             Live
+                          </>
+                        ) : hasRepo ? (
+                          <>
+                            <Github className="h-3 w-3" /> Source
                           </>
                         ) : (
                           <>
